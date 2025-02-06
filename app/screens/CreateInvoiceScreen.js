@@ -140,17 +140,12 @@ const CreateInvoiceScreen = () => {
     if (fileUri) {
       try {
         await shareAsync(fileUri); // Share the file using Expo sharing API
-        setModalVisible(false); // Close the modal after sharing
+        setModalVisible(false);
         console.log("Invoice shared successfully!");
       } catch (error) {
         Alert.alert("Error", "Failed to share the invoice.");
       }
     }
-  };
-
-  const handleSave = async () => {
-    await printToFile(); // Save the file first
-    setModalVisible(false); // Close the modal after saving
   };
 
   return (
@@ -334,7 +329,14 @@ const CreateInvoiceScreen = () => {
                 <Icon name="create" size={24} color="#f0ad4e" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.iconButton} onPress={handleSave}>
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={() => {
+                  // Save the invoice here (you can add your save logic)
+                  printToFile();
+                  setModalVisible(false); // Close the modal after saving
+                }}
+              >
                 {/* <Text style={styles.saveButtonText}>Save</Text> */}
                 <Icon name="save" size={24} color="#5bc0de" />
               </TouchableOpacity>
