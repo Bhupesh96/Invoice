@@ -27,7 +27,15 @@ const CreateInvoiceScreen = () => {
   const [billingName, setBillingName] = useState("");
   const [billingAddress, setBillingAddress] = useState("");
   const [items, setItems] = useState([
-    { id: "1", itemName: "", quantity: 1, unit: "", price: 0, total: 0 },
+    {
+      id: "1",
+      itemName: "",
+      quantity: 1,
+      unit: "",
+      price: 0,
+      total: 0,
+      hsn: 0,
+    },
   ]);
   const [modalVisible, setModalVisible] = useState(false);
   const [invoiceSummary, setInvoiceSummary] = useState("");
@@ -77,7 +85,9 @@ const CreateInvoiceScreen = () => {
     const summary = `GST Number: ${gstNumber}\nBilling To: ${billingName}, ${billingAddress}\n\nItems:\n${items
       .map(
         (item) =>
-          `${item.itemName} - Quantity: ${item.quantity}, Price: ₹${item.price}, Total: ₹${item.total}`
+          `${item.itemName} - Quantity: ${item.quantity}, Price: ₹${
+            item.price
+          }, Total: ₹${item.total || 0}`
       )
       .join("\n")}\n\nSubtotal: ₹${subtotal.toFixed(
       2
@@ -95,19 +105,21 @@ const CreateInvoiceScreen = () => {
     const firstName = billingName.split(" ")[0] || "Invoice"; // Extract first name
     const fileName = `${firstName}_${invoiceNumber}.pdf`;
     const fileUri = `${FileSystem.documentDirectory}${fileName}`;
-
+    const date = new Date().toLocaleDateString();
     let html = PdfCode(
       gstNumber,
       gst,
       cess,
       billingName,
       billingAddress,
+      date,
       items,
       subtotal,
       gstAmount,
-      cessAmount
+      cessAmount,
+      invoiceNumber
     );
-
+    console.log("Items passed to PdfCode:", items);
     try {
       const { uri } = await Print.printToFileAsync({ html });
 
@@ -118,7 +130,7 @@ const CreateInvoiceScreen = () => {
       const invoiceData = {
         fileName,
         fileUri,
-        date: new Date().toLocaleDateString(),
+        date,
         total: total.toFixed(2),
       };
 
@@ -128,6 +140,7 @@ const CreateInvoiceScreen = () => {
       await AsyncStorage.setItem("invoices", JSON.stringify(storedInvoices));
 
       console.log("Invoice saved:", invoiceData);
+      console.log(items);
       Alert.alert("Success", "Invoice saved successfully!");
       return fileUri; // Return the file URI for sharing
     } catch (error) {
@@ -283,14 +296,20 @@ const CreateInvoiceScreen = () => {
               </View>
 
               <Text style={styles.itemsHeader}>Items</Text>
-              {items.map((item, index) => (
-                <View key={index} style={styles.itemSummary}>
-                  <Text>
-                    {item.itemName} - {item.quantity} {item.unit} @ ₹
-                    {item.price.toFixed(2)}
-                  </Text>
-                </View>
-              ))}
+              {items.length === 0 ? (
+                <Text>No items available</Text>
+              ) : (
+                items.map((item, index) => (
+                  <View key={index} style={styles.itemSummary}>
+                    <Text>
+                      {item.itemName} - {item.quantity} {item.unit} @ ₹
+                      {item.price && !isNaN(item.price)
+                        ? item.price.toFixed(2)
+                        : "0.00"}
+                    </Text>
+                  </View>
+                ))
+              )}
 
               <View style={styles.totalSection}>
                 <Text style={styles.totalLabel}>Subtotal:</Text>

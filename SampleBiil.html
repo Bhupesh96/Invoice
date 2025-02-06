@@ -1,3 +1,22 @@
+const PdfCode = ( gstNumber, gst, cess, billingName, billingAddress, items, date
+) => { let itemRows = ""; let totalQuantity = 0; let totalAmount = 0;
+items.forEach((item, index) => { const taxableValue = item.quantity *
+item.price; const cgst = (taxableValue * gst) / 200; // 9% CGST const sgst =
+cgst; // 9% SGST const total = taxableValue + cgst + sgst; itemRows += `
+<tr>
+  <td>${item.id}</td>
+  <td>${item.itemName}</td>
+  <td>${item.hsn}</td>
+  <td>${item.quantity}</td>
+  <td>${item.unit}</td>
+  <td>${item.price}</td>
+  <td>${taxableValue}</td>
+  <td>${gst}% (${cgst.toFixed(2)})</td>
+  <td>${gst}% (${sgst.toFixed(2)})</td>
+  <td>${total.toFixed(2)}</td>
+</tr>
+`; totalQuantity += item.quantity; totalAmount += total; }); const amountInWords
+= convertToWords(totalAmount); return `
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -15,27 +34,23 @@
         max-width: 700px;
         margin: auto;
         background: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
       }
       .header,
       .footer {
         text-align: center;
         font-weight: bold;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
       }
       .section {
-        margin-bottom: 20px;
-        padding: 10px;
+        margin-bottom: 15px;
+        padding: 5px;
       }
       .flex-container {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
-        border-bottom: 2px solid #ddd;
-        padding-bottom: 10px;
-        margin-bottom: 20px;
       }
       .flex-container > div {
         width: 48%;
@@ -43,7 +58,7 @@
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 10px;
+        margin-top: 5px;
       }
       table,
       th,
@@ -52,16 +67,11 @@
       }
       th,
       td {
-        padding: 10px;
+        padding: 8px;
         text-align: left;
       }
       th {
         background: #f8f8f8;
-      }
-      .total-section {
-        text-align: right;
-        margin-top: 20px;
-        font-weight: bold;
       }
     </style>
   </head>
@@ -76,14 +86,14 @@
       <div class="flex-container">
         <div>
           <p><strong>Invoice No:</strong> 1</p>
-          <p><strong>Invoice Date:</strong> 10-01-2025</p>
+          <p><strong>Invoice Date:</strong> ${date}</p>
           <p><strong>State:</strong> Chhattisgarh</p>
         </div>
         <div>
           <h3>Details of Receiver | Billed to:</h3>
-          <p><strong>Name:</strong> Rasik Daily Needs</p>
-          <p><strong>Address:</strong> Risali Sector, Durg, 490006</p>
-          <p><strong>GSTIN:</strong> URP</p>
+          <p><strong>Name:</strong> ${billingName}</p>
+          <p><strong>Address:</strong> ${billingAddress}</p>
+          <p><strong>GSTIN:</strong> ${gstNumber}</p>
         </div>
       </div>
 
@@ -100,38 +110,12 @@
           <th>SGST</th>
           <th>Total</th>
         </tr>
-        <tr>
-          <td>1</td>
-          <td>Clear Water 1 Ltr</td>
-          <td>22011010</td>
-          <td>2</td>
-          <td>UNT</td>
-          <td>110.17</td>
-          <td>220.34</td>
-          <td>9.0% (19.83)</td>
-          <td>9.0% (19.83)</td>
-          <td>260.00</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>Clear Water 500ml</td>
-          <td>22011010</td>
-          <td>1</td>
-          <td>UNT</td>
-          <td>127.12</td>
-          <td>127.12</td>
-          <td>9.0% (11.44)</td>
-          <td>9.0% (11.44)</td>
-          <td>150.00</td>
-        </tr>
+        ${itemRows}
       </table>
 
-      <div class="total-section">
-        <p>Total Amount Before Tax: ₹347.46</p>
-        <p>Add : CGST: ₹31.27</p>
-        <p>Add : SGST: ₹31.27</p>
-        <p>Tax Amount : GST: ₹62.54</p>
-        <p><strong>Amount With Tax: ₹410</strong></p>
+      <div class="section">
+        <p><strong>Total Quantity:</strong> ${totalQuantity}</p>
+        <p><strong>Total Invoice Amount in Words:</strong> ${amountInWords}</p>
       </div>
 
       <div class="section">
@@ -150,3 +134,8 @@
     </div>
   </body>
 </html>
+`; }; // Helper function to convert numbers to words (for invoice total)
+function convertToWords(amount) { // This function can be implemented to convert
+the amount to words, or use a library like `number-to-words` return "Four
+Hundred Ten Rupees Only"; // Placeholder for the actual implementation } export
+{ PdfCode };
